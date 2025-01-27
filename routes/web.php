@@ -29,13 +29,6 @@ route::get('/home',[HomeController::class,'index'])->middleware('auth')->name('h
 
 Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 
-Route::get('/admin/home', [AdminController::class, 'index'])->name('adminhome');
-Route::get('/admin/add-data', [AdminController::class, 'create'])->name('admin.add-data');
-Route::post('/admin/store-data', [AdminController::class, 'store'])->name('admin.store-data');
-Route::delete('/admin/delete-cake/{id}', [AdminController::class, 'destroy'])->name('admin.delete-cake');
-Route::get('/admin/edit-cake/{id}', [AdminController::class, 'edit'])->name('admin.edit-cake');
-Route::post('/admin/update-cake/{id}', [AdminController::class, 'update'])->name('admin.update-cake');
-Route::get('/admin/cake-data', [AdminController::class, 'cakeData'])->name('admin.cake-data');
 Route::get('/cakes/{id}', [CakeController::class, 'show'])->name('cakes.show');
 Route::post('/cakes/{id}/like', [CakeController::class, 'like'])->name('cakes.like');
 Route::post('/cakes/{id}/dislike', [CakeController::class, 'dislike'])->name('cakes.dislike');
@@ -44,6 +37,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/home', [AdminController::class, 'index'])->name('adminhome');
+    Route::get('/admin/add-data', [AdminController::class, 'create'])->name('admin.add-data');
+    Route::post('/admin/store-data', [AdminController::class, 'store'])->name('admin.store-data');
+    Route::delete('/admin/delete-cake/{id}', [AdminController::class, 'destroy'])->name('admin.delete-cake');
+    Route::post('/admin/update-cake/{cake}', [CakeController::class, 'update'])->name('admin.update-cake');
+    Route::get('/admin/edit-cake/{id}', [AdminController::class, 'edit'])->name('admin.edit-cake');
+    Route::get('/admin/cake-data', [AdminController::class, 'cakeData'])->name('admin.cake-data');
 });
 
 Route::get('/admin/dashboard', [AdminController::class, 'index'])

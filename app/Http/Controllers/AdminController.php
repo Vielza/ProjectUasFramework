@@ -3,15 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Charts\likedislikeChart; // Import the likedislikeChart class
+use App\Models\Like;
 use App\Models\Cake;
 
 class AdminController extends Controller
 {
-    public function index(likedislikeChart $chart)
+    public function index()
     {
-        $chart = $chart->build();
-        return view('home', compact('chart'));
+        $likes = Like::where('like', true)->count() ?? 0;
+        $dislikes = Like::where('like', false)->count() ?? 0;
+
+        return view('admin.adminhome', compact('likes', 'dislikes'));
     }
 
     public function create()
@@ -21,20 +23,17 @@ class AdminController extends Controller
 
     public function store(Request $request)
     {
-        // Validate and store the data
         $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'recipe' => 'required|string',
         ]);
 
-        // Handle the image upload
         if ($request->hasFile('image')) {
-            $imageName = time().'.'.$request->image->extension();  
+            $imageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('images'), $imageName);
         }
 
-        // Save the data to the database
         Cake::create([
             'name' => $request->name,
             'image' => $imageName,
@@ -52,7 +51,6 @@ class AdminController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validate and update the data
         $request->validate([
             'name' => 'required|string|max:255',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -61,14 +59,12 @@ class AdminController extends Controller
 
         $cake = Cake::findOrFail($id);
 
-        // Handle the image upload
         if ($request->hasFile('image')) {
-            $imageName = time().'.'.$request->image->extension();  
+            $imageName = time() . '.' . $request->image->extension();
             $request->image->move(public_path('images'), $imageName);
             $cake->image = $imageName;
         }
 
-        // Update the data in the database
         $cake->update([
             'name' => $request->name,
             'recipe' => $request->recipe,
@@ -83,5 +79,11 @@ class AdminController extends Controller
         $cake->delete();
 
         return redirect()->route('adminhome')->with('success', 'Cake deleted successfully');
+    }
+
+    public function cakeData()
+    {
+        $cakes = Cake::all();
+        return view('admin.cake-data', compact('cakes'));
     }
 }
